@@ -26,6 +26,6 @@ To install / run this code, you need the following:
 1) Microsoft Visual Studio C# 2008
 2) Microsoft XNA Game Studio 3.1
 
-There's also a binary in the bin folder.
+There's also a binary in the redist folder.
 You must install xnafx31_redist.exe before
 running Roto-Photo
