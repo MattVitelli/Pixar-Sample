@@ -1,4 +1,10 @@
-﻿using System;
+﻿//-----------------------------------------------------------------
+// Roto-Photo
+// Rotoscoping software written by Matt Vitelli
+// Copyright (C) Matt Vitelli 2013
+//-----------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -9,6 +15,11 @@ namespace PhotoApp
     {
         public static Quad quad = new Quad();
 
+        //-----------------------------------------------------------------
+        // Roto-Photo
+        // Rotoscoping software written by Matt Vitelli
+        // Copyright (C) Matt Vitelli 2013
+        //-----------------------------------------------------------------
         public static void SetSamplerState(GraphicsDevice device, int samplerIndex, TextureFilter filter, TextureAddressMode addressMode)
         {
             device.SamplerStates[samplerIndex].AddressU = addressMode;
@@ -18,6 +29,11 @@ namespace PhotoApp
             device.SamplerStates[samplerIndex].MipFilter = filter;
         }
 
+        //-----------------------------------------------------------------
+        // Roto-Photo
+        // Rotoscoping software written by Matt Vitelli
+        // Copyright (C) Matt Vitelli 2013
+        //-----------------------------------------------------------------
         public static void SetTextureState(GraphicsDevice device, int index, Texture2D srcTexture)
         {
             SetSamplerState(device, 0, TextureFilter.Linear, TextureAddressMode.Wrap);

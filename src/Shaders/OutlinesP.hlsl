@@ -1,4 +1,4 @@
-float4 main(float2 TC : TEXCOORD0, uniform sampler BaseMap : register(S0), uniform float2 InvRes : register(C0), uniform float Threshold : register(C1)) : COLOR
+float4 main(float2 TC : TEXCOORD0, uniform sampler BaseMap : register(S0), uniform float2 InvRes : register(C0), uniform float sharpness : register(C1)) : COLOR
 {
 	
 	float3 avgValue = 0;
@@ -22,6 +22,6 @@ float4 main(float2 TC : TEXCOORD0, uniform sampler BaseMap : register(S0), unifo
     }
     variance /= (weight-1);
     
-    return pow(exp((variance)/-0.24),3.98);
+    return pow(exp((variance)/-0.24),sharpness);
     //return (variance>Threshold) ? 0 : 1;
 }

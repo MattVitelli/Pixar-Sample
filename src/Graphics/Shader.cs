@@ -1,4 +1,10 @@
-﻿using System;
+﻿//-----------------------------------------------------------------
+// Roto-Photo
+// Rotoscoping software written by Matt Vitelli
+// Copyright (C) Matt Vitelli 2013
+//-----------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -7,17 +13,22 @@ namespace PhotoApp.Graphics
 {
     public class Shader
     {
-        string name;
-        public string Name { get { return name; } }
-
+        // Shader Types
         PixelShader ps;
         VertexShader vs;
-        bool compiled = false;
 
+        // Compiler-Related Members
+        bool compiled = false;
         string errorMessage = null;
 
+        // Our graphics device
         GraphicsDevice GraphicsDevice;
 
+        //-----------------------------------------------------------------
+        // CompileFromFiles(GraphicsDevice device, string psFileName, 
+        // string vsFileName)
+        // Compiles shaders from a given filename
+        //-----------------------------------------------------------------
         public void CompileFromFiles(GraphicsDevice device, string psFileName, string vsFileName)
         {
             this.GraphicsDevice = device;
@@ -36,6 +47,7 @@ namespace PhotoApp.Graphics
                     errorMessage = errorMessage + "\n Pixel Shader: " + psShader.ErrorsAndWarnings;
                 Console.WriteLine(errorMessage);
             }
+            // Did we successfully compile?
             if (psShader.Success && vsShader.Success)
             {
                 ps = new PixelShader(GraphicsDevice, psShader.GetShaderCode());
@@ -44,14 +56,21 @@ namespace PhotoApp.Graphics
             }
         }
 
+        //-----------------------------------------------------------------
+        // SetupShader()
+        // Sets the graphic device's vertex and pixel shaders 
+        // to the shaders stored in this class
+        //-----------------------------------------------------------------
         public void SetupShader()
         {
+            // If our shaders aren't compiled, we need to exit early
             if (!compiled)
             {
                 if (errorMessage != null)
                     Console.WriteLine(errorMessage);
                 return;
             }
+            // Set our shaders on the device
             GraphicsDevice.PixelShader = ps;
             GraphicsDevice.VertexShader = vs;
         }

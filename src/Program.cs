@@ -1,3 +1,9 @@
+//-----------------------------------------------------------------
+// Roto-Photo
+// Rotoscoping software written by Matt Vitelli
+// Copyright (C) Matt Vitelli 2013
+//-----------------------------------------------------------------
+
 using System;
 using System.Windows.Forms;
 

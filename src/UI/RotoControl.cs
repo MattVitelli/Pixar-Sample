@@ -1,3 +1,9 @@
+//-----------------------------------------------------------------
+// Roto-Photo
+// Rotoscoping software written by Matt Vitelli
+// Copyright (C) Matt Vitelli 2013
+//-----------------------------------------------------------------
+
 using System.Diagnostics;
 using System;
 using System.Collections.Generic;
@@ -10,84 +16,145 @@ namespace PhotoApp
 {
     class RotoControl : GraphicsDeviceControl
     {
+        // Graphics-related members
         VertexDeclaration vertexDeclaration;
-        Stopwatch timer;
-
         Shader basic2D;
-
         Texture2D frame = null;
         RotoscopeFilter filter;
+
+        // State parameters
         bool imageLoaded = false;
         bool imageProcessed = false;
+        bool drawOriginalImage = false;
 
-        public void LoadImage()
+        //-----------------------------------------------------------------
+        // LoadImage(string filename)
+        // Loads an image from a given filename.
+        // Returns true on success and false on failure
+        //-----------------------------------------------------------------
+        public bool LoadImage(string filename)
         {
-            System.Windows.Forms.OpenFileDialog dlg = new System.Windows.Forms.OpenFileDialog();
-            dlg.Title = "Find a photo";
-            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            try
             {
-                try
-                {
-                    frame = Texture2D.FromFile(GraphicsDevice, dlg.FileName);
-                    this.Width = frame.Width;
-                    this.Height = frame.Height;
-                    imageLoaded = true;
-                    imageProcessed = false;
-                }
-                catch
+                frame = Texture2D.FromFile(GraphicsDevice, filename);
+                this.Width = frame.Width;
+                this.Height = frame.Height;
+                imageLoaded = true;
+                imageProcessed = false;
+            }
+            catch
+            {
+                if (frame != null)
                 {
                     frame.Dispose();
-                    imageLoaded = false;
+                    frame = null;
                 }
+                imageLoaded = false;
             }
+            return imageLoaded;
         }
 
-        public void SaveImage()
+        //-----------------------------------------------------------------
+        // SaveImage(string filename)
+        // Saves an image to the given filename in the .png format
+        //-----------------------------------------------------------------
+        public void SaveImage(string filename)
         {
             if (!imageLoaded)
-                return;
-            System.Windows.Forms.SaveFileDialog dlg = new System.Windows.Forms.SaveFileDialog();
-            dlg.Title = "Save a photo";
-            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                filter.GetFrame().Save(dlg.FileName, ImageFileFormat.Png);
+                MessageBox.Show("Error! Please load and process an image first!");
+                return;
             }
+
+            filter.GetFrame().Save(filename + ".png", ImageFileFormat.Png);
         }
 
+        //-----------------------------------------------------------------
+        // SetEdgeSharpness(float value)
+        // Updates the filter's sharpness value
+        //-----------------------------------------------------------------
+        public void SetEdgeSharpness(float value)
+        {
+            filter.SetEdgeSharpness(value);
+        }
+
+        //-----------------------------------------------------------------
+        // SetNumMedianPasses(int value)
+        // Sets the number of median filter passes that will be
+        // performed by the rotoscoper
+        //-----------------------------------------------------------------
+        public void SetNumMedianPasses(int value)
+        {
+            filter.SetNumKMeansMedianPasses(value);
+            imageProcessed = false;
+        }
+
+        //-----------------------------------------------------------------
+        // SetNumberOfColors(int value)
+        // Sets the number of clusters used by the K-Means algorithm
+        //-----------------------------------------------------------------
+        public void SetNumberOfColors(int value)
+        {
+            filter.SetNumClusters(value);
+            imageProcessed = false;
+        }
+
+        //-----------------------------------------------------------------
+        // SetDrawMode(bool mode)
+        // Sets the draw mode. A value of true means that we draw the 
+        // original image. A value of false means we draw the rotoscoped
+        // image. (Default value is false)
+        //-----------------------------------------------------------------
+        public void SetDrawMode(bool mode)
+        {
+            drawOriginalImage = mode;
+        }
+
+        //-----------------------------------------------------------------
+        // OnDeviceReset()
+        // Handles the case when the graphics device is reset
+        // This can happen when the user resizes the window
+        //-----------------------------------------------------------------
         protected override void OnDeviceReset()
         {
             imageProcessed = false;
             base.OnDeviceReset();
         }
-        
-        /// <summary>
-        /// Initializes the control.
-        /// </summary>
+
+        //-----------------------------------------------------------------
+        // Initialize()
+        // Called when the graphics device is finally initialized
+        // This function is primarily used to load resources
+        //-----------------------------------------------------------------
         protected override void Initialize()
         {
             // Create our vertex declaration.
             vertexDeclaration = new VertexDeclaration(GraphicsDevice, VertexPositionTexture.VertexElements);
 
-            // Start the animation timer.
-            timer = Stopwatch.StartNew();
-
-            //Create our filter
+            // Create our filter
             filter = new RotoscopeFilter(GraphicsDevice);
 
-            //Create a basic shader
+            // Create a basic shader
             basic2D = new Shader();
             basic2D.CompileFromFiles(GraphicsDevice, "Shaders/BasicP.hlsl", "Shaders/BasicV.hlsl");
 
-            // Hook the idle event to constantly redraw our animation.
+            // Load up a test image
+            LoadImage("Examples/uma.jpg");
+
+            // Hook the idle event to constantly redraw our image.
             Application.Idle += delegate { Invalidate(); };
         }
 
 
-        /// <summary>
-        /// Draws the control.
-        /// </summary>
+        //-----------------------------------------------------------------
+        // Draw()
+        // Handles a render call. This is where the bulk of the 
+        // application's work is performed, including creating the 
+        // rotoscoped image
+        //-----------------------------------------------------------------
         protected override void Draw()
         {
+            // Clear the back-buffer
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // Set renderstates.
@@ -98,17 +165,18 @@ namespace PhotoApp
             // Set vertex declaration
             GraphicsDevice.VertexDeclaration = vertexDeclaration;
 
-            //Finally, draw the rotoscoped image!
+            // Finally, draw the rotoscoped image!
             if (imageLoaded)
             {
-                if (!imageProcessed)
-                {
-                    filter.ProcessFrame(frame);
-                    imageProcessed = true;
-                }
+                // Update the frame, recomputing the entire image if necessary
+                filter.ProcessFrame(frame, !imageProcessed);
+                imageProcessed = true;
 
                 basic2D.SetupShader();
-                GraphicsUtils.SetTextureState(GraphicsDevice, 0, filter.GetFrame());
+                // Pick the image to draw
+                Texture2D image = (drawOriginalImage) ? frame : filter.GetFrame();
+                // Setup the texture states
+                GraphicsUtils.SetTextureState(GraphicsDevice, 0, image);
                 GraphicsUtils.quad.Render(GraphicsDevice);
             }
         }
