@@ -16,9 +16,11 @@ namespace PhotoApp
         public static Quad quad = new Quad();
 
         //-----------------------------------------------------------------
-        // Roto-Photo
-        // Rotoscoping software written by Matt Vitelli
-        // Copyright (C) Matt Vitelli 2013
+        // SetSamplerState(GraphicsDevice device, int samplerIndex, 
+        // TextureFilter filter, TextureAddressMode addressMode)
+        // Sets the sampler state at a given index. Used to 
+        // control mip-mapping and texture filters, as well as 
+        // the address mode (wrap vs clamp, etc)
         //-----------------------------------------------------------------
         public static void SetSamplerState(GraphicsDevice device, int samplerIndex, TextureFilter filter, TextureAddressMode addressMode)
         {
@@ -30,9 +32,10 @@ namespace PhotoApp
         }
 
         //-----------------------------------------------------------------
-        // Roto-Photo
-        // Rotoscoping software written by Matt Vitelli
-        // Copyright (C) Matt Vitelli 2013
+        // SetTextureState(GraphicsDevice device, int index, 
+        // Texture2D srcTexture)
+        // Sets the texture at a given index. Also sets up inverse
+        // resolution shader constants for use in shaders.
         //-----------------------------------------------------------------
         public static void SetTextureState(GraphicsDevice device, int index, Texture2D srcTexture)
         {
