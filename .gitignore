@@ -3,6 +3,10 @@
 *.lo
 *.o
 
+# Binary and Object Files
+bin/
+obj/
+
 # Compiled Dynamic libraries
 *.so
 *.dylib
